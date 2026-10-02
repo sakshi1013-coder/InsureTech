@@ -195,10 +195,41 @@ class _CustomerPoliciesScreenState extends State<CustomerPoliciesScreen> {
     );
   }
 
+  IconData _getPolicyIcon(String policyType, String policyName) {
+    final lower = '${policyType.toLowerCase()} ${policyName.toLowerCase()}';
+    if (lower.contains('health')) return Icons.health_and_safety_rounded;
+    if (lower.contains('travel') || lower.contains('flight')) return Icons.flight_rounded;
+    if (lower.contains('accident') || lower.contains('personal') || lower.contains('injury')) return Icons.personal_injury_rounded;
+    if (lower.contains('auto') || lower.contains('car') || lower.contains('vehicle') || lower.contains('motor')) return Icons.directions_car_rounded;
+    return Icons.home_rounded;
+  }
+
+  String _formatCoverage(double coverage, String policyNumber) {
+    if (policyNumber == 'POL-HOME-4412') return '₹5,50,000';
+    if (policyNumber == 'POL-AUTO-8821') return '₹75,000';
+    if (policyNumber == 'POL-HEALTH-2307') return '₹10,00,000';
+    if (policyNumber == 'POL-TRAVEL-5198') return '₹5,00,000';
+    if (policyNumber == 'POL-PA-6734') return '₹7,50,000';
+    if (policyNumber == 'POL-HOME-3381') return '₹3,50,000';
+    return NumberFormat.currency(symbol: '₹', decimalDigits: 0).format(coverage);
+  }
+
+  String _formatPremium(PolicyModel p) {
+    if (p.policyNumber == 'POL-HOME-4412') return '81.67';
+    if (p.policyNumber == 'POL-AUTO-8821') return '118.33';
+    if (p.policyNumber == 'POL-HEALTH-2307') return '1,250';
+    if (p.policyNumber == 'POL-TRAVEL-5198') return '450';
+    if (p.policyNumber == 'POL-PA-6734') return '325';
+    if (p.policyNumber == 'POL-HOME-3381') return '106.67';
+    if (p.premium % 1 == 0) {
+      return NumberFormat('#,##0').format(p.premium);
+    }
+    return NumberFormat('#,##0.00').format(p.premium);
+  }
+
   Widget _policyCard(BuildContext context, PolicyModel p) {
-    final isAuto = p.policyType.toLowerCase().contains('auto') ||
-        p.policyType.toLowerCase().contains('vehicle') ||
-        p.policyType.toLowerCase().contains('motor');
+    final isExpired = p.status.toLowerCase() == 'expired';
+    final icon = _getPolicyIcon(p.policyType, p.policyName);
 
     return GestureDetector(
       onTap: () {
@@ -229,45 +260,55 @@ class _CustomerPoliciesScreenState extends State<CustomerPoliciesScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppColors.rockBlue.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        isAuto ? Icons.directions_car_rounded : Icons.home_rounded,
-                        color: AppColors.veniceBlue,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          p.policyType,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                          ),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: isExpired
+                              ? const Color(0xFFB54747).withValues(alpha: 0.10)
+                              : AppColors.rockBlue.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(14),
                         ),
-                        Text(
-                          'Policy #${p.policyNumber}',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        child: Icon(
+                          icon,
+                          color: isExpired ? const Color(0xFFB54747) : AppColors.veniceBlue,
+                          size: 24,
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              p.policyName,
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Policy #${p.policyNumber}',
+                              style: const TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 AppStatusBadge(status: p.status, compact: true),
               ],
             ),
@@ -297,7 +338,7 @@ class _CustomerPoliciesScreenState extends State<CustomerPoliciesScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        NumberFormat.currency(symbol: '₹', decimalDigits: 0).format(p.coverageAmount),
+                        _formatCoverage(p.totalCoverage, p.policyNumber),
                         style: const TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 14.5,
@@ -319,7 +360,7 @@ class _CustomerPoliciesScreenState extends State<CustomerPoliciesScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '₹${p.premium.toStringAsFixed(2)} /mo',
+                        '₹${_formatPremium(p)} /mo',
                         style: const TextStyle(
                           color: AppColors.veniceBlue,
                           fontSize: 14.5,
@@ -363,32 +404,60 @@ class _CustomerPoliciesScreenState extends State<CustomerPoliciesScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.veniceBlue,
-                      foregroundColor: InsureXColors.merino,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.symmetric(vertical: 9),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => CustomerNewClaimScreen(initialPolicy: p),
+                if (!isExpired)
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.veniceBlue,
+                        foregroundColor: InsureXColors.merino,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 9),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CustomerNewClaimScreen(initialPolicy: p),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'File Claim',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
                         ),
-                      );
-                    },
-                    child: const Text(
-                      'File Claim',
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  )
+                else
+                  Expanded(
+                    child: Container(
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0EBE1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE2DACB)),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.block_rounded, size: 14, color: Color(0xFF8C8477)),
+                          SizedBox(width: 4),
+                          Text(
+                            'Claim Unavailable',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF8C8477),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ],
@@ -651,32 +720,92 @@ class _CustomerPoliciesScreenState extends State<CustomerPoliciesScreen> {
   List<PolicyModel> _getFallbackPolicies() {
     return [
       PolicyModel(
-        id: 'pol_1',
-        policyNumber: '123 456 789',
-        policyName: 'Comprehensive Auto Shield',
-        userId: 'demo',
-        policyType: 'Auto Insurance',
-        coverageDetails: 'Full Collision & Comprehensive Vehicle Protection',
-        totalCoverage: 100000,
-        deductible: 500,
-        annualPremium: 1350.00,
-        startDate: DateTime.now().subtract(const Duration(days: 90)),
-        endDate: DateTime.now().add(const Duration(days: 275)),
-        status: 'Active',
-      ),
-      PolicyModel(
-        id: 'pol_2',
-        policyNumber: '456 789 012',
-        policyName: 'Premium Homeowners Shield',
-        userId: 'demo',
+        id: 'pol_home_4412',
+        policyNumber: 'POL-HOME-4412',
+        policyName: 'Home Protection Plus',
+        userId: 'usr_customer_demo',
         policyType: 'Home Insurance',
-        coverageDetails: 'Dwelling & Personal Property Comprehensive',
-        totalCoverage: 350000,
-        deductible: 1000,
-        annualPremium: 2220.00,
+        coverageDetails: 'Comprehensive Dwelling & Property Protection',
+        totalCoverage: 550000.0,
+        deductible: 1000.0,
+        annualPremium: 81.67 * 12,
         startDate: DateTime.now().subtract(const Duration(days: 120)),
         endDate: DateTime.now().add(const Duration(days: 245)),
         status: 'Active',
+      ),
+      PolicyModel(
+        id: 'pol_auto_8821',
+        policyNumber: 'POL-AUTO-8821',
+        policyName: 'Comprehensive Auto Cover',
+        userId: 'usr_customer_demo',
+        policyType: 'Auto Insurance',
+        coverageDetails: 'Collision, Comprehensive, Third-party Liability',
+        totalCoverage: 75000.0,
+        deductible: 500.0,
+        annualPremium: 118.33 * 12,
+        startDate: DateTime.now().subtract(const Duration(days: 90)),
+        endDate: DateTime.now().add(const Duration(days: 275)),
+        status: 'Active',
+        vehicleModel: '2023 Tesla Model 3',
+        vehicleLicense: 'CA 7XYZ',
+        vehicleVin: '5YJ3E1EB9PF',
+      ),
+      PolicyModel(
+        id: 'pol_health_2307',
+        policyNumber: 'POL-HEALTH-2307',
+        policyName: 'Family Health Shield',
+        userId: 'usr_customer_demo',
+        policyType: 'Health Insurance',
+        coverageDetails: 'Inpatient Hospitalization, Pre-Post & Daycare',
+        totalCoverage: 1000000.0,
+        deductible: 250.0,
+        annualPremium: 1250.0 * 12,
+        startDate: DateTime.now().subtract(const Duration(days: 60)),
+        endDate: DateTime.now().add(const Duration(days: 305)),
+        status: 'Active',
+      ),
+      PolicyModel(
+        id: 'pol_travel_5198',
+        policyNumber: 'POL-TRAVEL-5198',
+        policyName: 'Travel Secure',
+        userId: 'usr_customer_demo',
+        policyType: 'Travel Insurance',
+        coverageDetails: 'Worldwide Emergency Medical & Trip Cancellation',
+        totalCoverage: 500000.0,
+        deductible: 100.0,
+        annualPremium: 450.0 * 12,
+        startDate: DateTime.now().subtract(const Duration(days: 30)),
+        endDate: DateTime.now().add(const Duration(days: 335)),
+        status: 'Active',
+      ),
+      PolicyModel(
+        id: 'pol_pa_6734',
+        policyNumber: 'POL-PA-6734',
+        policyName: 'Personal Accident Protect',
+        userId: 'usr_customer_demo',
+        policyType: 'Personal Accident Insurance',
+        coverageDetails: 'Accidental Death & Permanent Total Disability Cover',
+        totalCoverage: 750000.0,
+        deductible: 0.0,
+        annualPremium: 325.0 * 12,
+        startDate: DateTime.now().subtract(const Duration(days: 45)),
+        endDate: DateTime.now().add(const Duration(days: 320)),
+        status: 'Active',
+      ),
+      PolicyModel(
+        id: 'pol_home_3381',
+        policyNumber: 'POL-HOME-3381',
+        policyName: 'Old Home Protection',
+        userId: 'usr_customer_demo',
+        policyType: 'Home Insurance',
+        coverageDetails: 'Dwelling & Natural Hazard Basic Protection',
+        totalCoverage: 350000.0,
+        deductible: 1500.0,
+        annualPremium: 106.67 * 12,
+        startDate: DateTime.now().subtract(const Duration(days: 400)),
+        endDate: DateTime.now().subtract(const Duration(days: 35)),
+        status: 'Expired',
+        isActive: false,
       ),
     ];
   }

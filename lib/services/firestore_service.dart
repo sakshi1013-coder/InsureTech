@@ -630,11 +630,11 @@ class FirestoreService {
               }
 
               if (userPolicies.isEmpty) {
-                return _policies.where((p) => p.status == 'Active').toList();
+                return _policies;
               }
               return userPolicies;
             })
-            .handleError((_) => _policies.where((p) => p.status == 'Active').toList());
+            .handleError((_) => _policies);
       } catch (_) {}
     }
 
@@ -645,7 +645,7 @@ class FirestoreService {
         p.userId == 'usr_customer_demo' ||
         p.userId == 'DEMO'
       ).toList();
-      return userPolicies.isNotEmpty ? userPolicies : _policies.where((p) => p.status == 'Active').toList();
+      return userPolicies.isNotEmpty ? userPolicies : _policies;
     }).asBroadcastStream(onListen: (sub) {
       _policiesStream.add(List.from(_policies));
     });
@@ -969,37 +969,98 @@ class FirestoreService {
   static List<PolicyModel> _initMockPolicies() {
     return [
       PolicyModel(
-        id: 'pol_1',
+        id: 'pol_home_4412',
+        userId: 'usr_customer_demo',
+        policyNumber: 'POL-HOME-4412',
+        policyName: 'Home Protection Plus',
+        policyType: 'Home Insurance',
+        coverageDetails: 'Comprehensive Dwelling & Property Protection',
+        totalCoverage: 550000.0,
+        deductible: 1000.0,
+        annualPremium: 81.67 * 12,
+        startDate: DateTime.now().subtract(const Duration(days: 120)),
+        endDate: DateTime.now().add(const Duration(days: 245)),
+        status: 'Active',
+        tier: 'Gold',
+      ),
+      PolicyModel(
+        id: 'pol_auto_8821',
         userId: 'usr_customer_demo',
         policyNumber: 'POL-AUTO-8821',
-        policyName: 'Comprehensive Auto Shield',
-        policyType: 'auto',
-        coverageDetails: 'Collision, Comprehensive, Liability ₹500k, PIP',
+        policyName: 'Comprehensive Auto Cover',
+        policyType: 'Auto Insurance',
+        coverageDetails: 'Collision, Comprehensive, Third-party Liability',
         totalCoverage: 75000.0,
         deductible: 500.0,
-        annualPremium: 1420.0,
-        startDate: DateTime(2024, 1, 1),
-        endDate: DateTime(2025, 1, 1),
+        annualPremium: 118.33 * 12,
+        startDate: DateTime.now().subtract(const Duration(days: 90)),
+        endDate: DateTime.now().add(const Duration(days: 275)),
         status: 'Active',
-        vehicleModel: '2023 Tesla Model Y Long Range',
-        vehicleLicense: 'WA-7XYZ89',
-        vehicleVin: '5YJ3E1EB8NF123456',
+        vehicleModel: '2023 Tesla Model 3',
+        vehicleLicense: 'CA 7XYZ',
+        vehicleVin: '5YJ3E1EB9PF',
         tier: 'Platinum',
       ),
       PolicyModel(
-        id: 'pol_2',
+        id: 'pol_health_2307',
         userId: 'usr_customer_demo',
-        policyNumber: 'POL-HOME-4412',
-        policyName: 'Premier Home Protection',
-        policyType: 'home',
-        coverageDetails: 'Dwelling, Personal Property, Liability, Loss of Use',
-        totalCoverage: 550000.0,
-        deductible: 1000.0,
-        annualPremium: 980.0,
-        startDate: DateTime(2024, 3, 15),
-        endDate: DateTime(2025, 3, 15),
+        policyNumber: 'POL-HEALTH-2307',
+        policyName: 'Family Health Shield',
+        policyType: 'Health Insurance',
+        coverageDetails: 'Inpatient Hospitalization, Pre-Post & Daycare',
+        totalCoverage: 1000000.0,
+        deductible: 250.0,
+        annualPremium: 1250.0 * 12,
+        startDate: DateTime.now().subtract(const Duration(days: 60)),
+        endDate: DateTime.now().add(const Duration(days: 305)),
+        status: 'Active',
+        tier: 'Platinum',
+      ),
+      PolicyModel(
+        id: 'pol_travel_5198',
+        userId: 'usr_customer_demo',
+        policyNumber: 'POL-TRAVEL-5198',
+        policyName: 'Travel Secure',
+        policyType: 'Travel Insurance',
+        coverageDetails: 'Worldwide Emergency Medical & Trip Cancellation',
+        totalCoverage: 500000.0,
+        deductible: 100.0,
+        annualPremium: 450.0 * 12,
+        startDate: DateTime.now().subtract(const Duration(days: 30)),
+        endDate: DateTime.now().add(const Duration(days: 335)),
         status: 'Active',
         tier: 'Gold',
+      ),
+      PolicyModel(
+        id: 'pol_pa_6734',
+        userId: 'usr_customer_demo',
+        policyNumber: 'POL-PA-6734',
+        policyName: 'Personal Accident Protect',
+        policyType: 'Personal Accident Insurance',
+        coverageDetails: 'Accidental Death & Permanent Total Disability Cover',
+        totalCoverage: 750000.0,
+        deductible: 0.0,
+        annualPremium: 325.0 * 12,
+        startDate: DateTime.now().subtract(const Duration(days: 45)),
+        endDate: DateTime.now().add(const Duration(days: 320)),
+        status: 'Active',
+        tier: 'Silver',
+      ),
+      PolicyModel(
+        id: 'pol_home_3381',
+        userId: 'usr_customer_demo',
+        policyNumber: 'POL-HOME-3381',
+        policyName: 'Old Home Protection',
+        policyType: 'Home Insurance',
+        coverageDetails: 'Dwelling & Natural Hazard Basic Protection',
+        totalCoverage: 350000.0,
+        deductible: 1500.0,
+        annualPremium: 106.67 * 12,
+        startDate: DateTime.now().subtract(const Duration(days: 400)),
+        endDate: DateTime.now().subtract(const Duration(days: 35)),
+        status: 'Expired',
+        tier: 'Silver',
+        isActive: false,
       ),
     ];
   }

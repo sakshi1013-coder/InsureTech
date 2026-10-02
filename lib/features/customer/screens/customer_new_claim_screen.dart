@@ -162,16 +162,16 @@ class _CustomerNewClaimScreenState extends State<CustomerNewClaimScreen> {
                 final userPolicies = (snap.data ?? []).where((p) => p.status == 'Active').toList();
                 final policies = userPolicies.isNotEmpty ? userPolicies : _getFallbackPolicies();
 
-                if (_selectedPolicy == null && policies.isNotEmpty) {
+                if ((_selectedPolicy == null || !policies.any((p) => p.id == _selectedPolicy?.id || p.policyNumber == _selectedPolicy?.policyNumber)) && policies.isNotEmpty) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted && _selectedPolicy == null) {
+                    if (mounted) {
                       setState(() => _selectedPolicy = policies.first);
                     }
                   });
                 }
 
-                final currentPolicy = policies.any((p) => p.id == _selectedPolicy?.id)
-                    ? policies.firstWhere((p) => p.id == _selectedPolicy?.id)
+                final currentPolicy = policies.any((p) => p.id == _selectedPolicy?.id || p.policyNumber == _selectedPolicy?.policyNumber)
+                    ? policies.firstWhere((p) => p.id == _selectedPolicy?.id || p.policyNumber == _selectedPolicy?.policyNumber)
                     : policies.first;
 
                 return Column(
@@ -1372,45 +1372,76 @@ class _CustomerNewClaimScreenState extends State<CustomerNewClaimScreen> {
   List<PolicyModel> _getFallbackPolicies() {
     return [
       PolicyModel(
-        id: 'pol_auto_001',
-        policyNumber: 'POL-2024-8841',
+        id: 'pol_home_4412',
+        policyNumber: 'POL-HOME-4412',
+        policyName: 'Home Protection Plus',
         userId: 'usr_customer_demo',
-        policyName: 'Auto Comprehensive Protection',
-        policyType: 'Auto Insurance',
-        coverageDetails: 'Full Collision & Comprehensive Vehicle Protection',
-        totalCoverage: 500000,
-        annualPremium: 9500,
-        deductible: 2000,
-        startDate: DateTime.now().subtract(const Duration(days: 90)),
-        endDate: DateTime.now().add(const Duration(days: 275)),
-        status: 'Active',
-      ),
-      PolicyModel(
-        id: 'pol_home_002',
-        policyNumber: 'POL-2024-9923',
-        userId: 'usr_customer_demo',
-        policyName: 'Homeowners Premier Shield',
         policyType: 'Home Insurance',
-        coverageDetails: 'Dwelling & Personal Property Comprehensive',
-        totalCoverage: 1500000,
-        annualPremium: 14000,
-        deductible: 5000,
+        coverageDetails: 'Comprehensive Dwelling & Property Protection',
+        totalCoverage: 550000.0,
+        deductible: 1000.0,
+        annualPremium: 81.67 * 12,
         startDate: DateTime.now().subtract(const Duration(days: 120)),
         endDate: DateTime.now().add(const Duration(days: 245)),
         status: 'Active',
       ),
       PolicyModel(
-        id: 'pol_health_003',
-        policyNumber: 'POL-2024-7712',
+        id: 'pol_auto_8821',
+        policyNumber: 'POL-AUTO-8821',
+        policyName: 'Comprehensive Auto Cover',
         userId: 'usr_customer_demo',
-        policyName: 'Family Health Guard Plus',
+        policyType: 'Auto Insurance',
+        coverageDetails: 'Collision, Comprehensive, Third-party Liability',
+        totalCoverage: 75000.0,
+        deductible: 500.0,
+        annualPremium: 118.33 * 12,
+        startDate: DateTime.now().subtract(const Duration(days: 90)),
+        endDate: DateTime.now().add(const Duration(days: 275)),
+        status: 'Active',
+        vehicleModel: '2023 Tesla Model 3',
+        vehicleLicense: 'CA 7XYZ',
+        vehicleVin: '5YJ3E1EB9PF',
+      ),
+      PolicyModel(
+        id: 'pol_health_2307',
+        policyNumber: 'POL-HEALTH-2307',
+        policyName: 'Family Health Shield',
+        userId: 'usr_customer_demo',
         policyType: 'Health Insurance',
-        coverageDetails: 'Complete Family Inpatient & Emergency Cover',
-        totalCoverage: 1000000,
-        annualPremium: 18500,
-        deductible: 1000,
+        coverageDetails: 'Inpatient Hospitalization, Pre-Post & Daycare',
+        totalCoverage: 1000000.0,
+        deductible: 250.0,
+        annualPremium: 1250.0 * 12,
         startDate: DateTime.now().subtract(const Duration(days: 60)),
         endDate: DateTime.now().add(const Duration(days: 305)),
+        status: 'Active',
+      ),
+      PolicyModel(
+        id: 'pol_travel_5198',
+        policyNumber: 'POL-TRAVEL-5198',
+        policyName: 'Travel Secure',
+        userId: 'usr_customer_demo',
+        policyType: 'Travel Insurance',
+        coverageDetails: 'Worldwide Emergency Medical & Trip Cancellation',
+        totalCoverage: 500000.0,
+        deductible: 100.0,
+        annualPremium: 450.0 * 12,
+        startDate: DateTime.now().subtract(const Duration(days: 30)),
+        endDate: DateTime.now().add(const Duration(days: 335)),
+        status: 'Active',
+      ),
+      PolicyModel(
+        id: 'pol_pa_6734',
+        policyNumber: 'POL-PA-6734',
+        policyName: 'Personal Accident Protect',
+        userId: 'usr_customer_demo',
+        policyType: 'Personal Accident Insurance',
+        coverageDetails: 'Accidental Death & Permanent Total Disability Cover',
+        totalCoverage: 750000.0,
+        deductible: 0.0,
+        annualPremium: 325.0 * 12,
+        startDate: DateTime.now().subtract(const Duration(days: 45)),
+        endDate: DateTime.now().add(const Duration(days: 320)),
         status: 'Active',
       ),
     ];

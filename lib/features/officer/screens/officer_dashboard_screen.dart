@@ -773,26 +773,33 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Coverage', style: TextStyle(color: Color(0xFF5F7480), fontSize: 10)),
-                                  Text(
-                                    '₹${NumberFormat.currency(symbol: '', decimalDigits: 0).format(p.totalCoverage)}',
-                                    style: const TextStyle(
-                                      color: Color(0xFF16587B),
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w800,
+                              Flexible(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Coverage', style: TextStyle(color: Color(0xFF5F7480), fontSize: 10)),
+                                    Text(
+                                      '₹${NumberFormat.currency(symbol: '', decimalDigits: 0).format(p.totalCoverage)}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Color(0xFF16587B),
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w800,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
+                              const SizedBox(width: 8),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   const Text('Premium', style: TextStyle(color: Color(0xFF5F7480), fontSize: 10)),
                                   Text(
                                     '₹${p.monthlyPremium.toStringAsFixed(0)}/mo',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       color: Color(0xFF16587B),
                                       fontSize: 12.5,
