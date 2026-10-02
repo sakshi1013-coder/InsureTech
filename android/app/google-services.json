@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "194484779958",
+    "project_id": "insuretech-a6674",
+    "storage_bucket": "insuretech-a6674.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:194484779958:android:7ce81c5e48e118284b5f17",
+        "android_client_info": {
+          "package_name": "com.insurex.insurex_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAT0ZMDOywfw4Kcvj94mRq0C5wSc3fzzBE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

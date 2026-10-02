@@ -1,0 +1,209 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && getUserData().role == role;
+    }
+
+    function isAdmin() {
+      return hasRole('admin');
+    }
+
+    function isOfficer() {
+      return hasRole('officer');
+    }
+
+    function isCustomer() {
+      return hasRole('customer');
+    }
+
+    function isAssignedOfficer(officerId) {
+      return isOfficer() && (
+        request.auth.uid == officerId ||
+        getUserData().employeeId == officerId
+      );
+    }
+
+    // ==========================================
+    // 1. Users collection
+    // ==========================================
+    match /users/{userId} {
+      // Customer/Officer/Admin can read their own profile; Admin can read all users
+      allow read: if isOwner(userId) || isAdmin() || isOfficer();
+
+      // Customer can create their initial profile during signup
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+
+      // Customer can update their own profile; Admin can manage all profiles
+      allow update: if isOwner(userId) || isAdmin();
+
+      // Only admin can delete user profiles
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 2. Policies collection
+    // ==========================================
+    match /policies/{policyId} {
+      // Customer can read policies belonging to them; Admin/Officer can view policies
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.customerId == request.auth.uid ||
+        isOfficer() ||
+        isAdmin()
+      );
+
+      // Only admins can create, update, or delete policies
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 3. Claims collection
+    // ==========================================
+    match /claims/{claimId} {
+      // Customer reads their own claims; Officer reads assigned claims; Admin reads all
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.customerId == request.auth.uid ||
+        isAssignedOfficer(resource.data.officerId) ||
+        isAdmin()
+      );
+
+      // Customer can create claim for themselves
+      allow create: if isAuthenticated() && (
+        request.resource.data.userId == request.auth.uid ||
+        request.resource.data.customerId == request.auth.uid
+      );
+
+      // Officer can update status/remarks on assigned claims; Admin can update (e.g. assign officer); Customer cannot alter status
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        (isOfficer() && isAssignedOfficer(resource.data.officerId))
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 4. Documents metadata collection
+    // ==========================================
+    match /documents/{documentId} {
+      // Customer can read their claim documents; Officer and Admin can read
+      allow read: if isAuthenticated() && (
+        resource.data.customerId == request.auth.uid ||
+        resource.data.userId == request.auth.uid ||
+        isOfficer() ||
+        isAdmin()
+      );
+
+      // Customer can upload document metadata for their claim
+      allow create: if isAuthenticated() && (
+        request.resource.data.customerId == request.auth.uid ||
+        request.resource.data.userId == request.auth.uid
+      );
+
+      // Officer can update verification status / remarks; Admin can manage
+      allow update: if isAuthenticated() && (
+        isOfficer() ||
+        isAdmin()
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 5. Evidence metadata collection
+    // ==========================================
+    match /evidence/{evidenceId} {
+      // Customer reads their evidence; Officer and Admin can read
+      allow read: if isAuthenticated() && (
+        resource.data.customerId == request.auth.uid ||
+        resource.data.userId == request.auth.uid ||
+        isOfficer() ||
+        isAdmin()
+      );
+
+      // Customer can create evidence metadata for their claim
+      allow create: if isAuthenticated() && (
+        request.resource.data.customerId == request.auth.uid ||
+        request.resource.data.userId == request.auth.uid
+      );
+
+      allow update, delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 6. Officers collection
+    // ==========================================
+    match /officers/{officerId} {
+      // Authenticated users can view officer directory; Admin can manage
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 7. Notifications collection
+    // ==========================================
+    match /notifications/{notificationId} {
+      // Users can only read notifications intended for them
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+
+      // Authenticated services and roles can create notifications
+      allow create: if isAuthenticated();
+
+      // User can mark their own notification as read
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 8. Messages (Chat) collection
+    // ==========================================
+    match /messages/{messageId} {
+      // Parties involved in the conversation or Admin can read
+      allow read: if isAuthenticated() && (
+        resource.data.senderId == request.auth.uid ||
+        resource.data.receiverId == request.auth.uid ||
+        isOfficer() ||
+        isAdmin()
+      );
+
+      // Senders can create their own messages
+      allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+
+      allow update, delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 9. Audit Logs collection
+    // ==========================================
+    match /auditLogs/{logId} {
+      // Only Admin can read audit logs
+      allow read: if isAdmin();
+
+      // System events and authenticated users can append audit logs
+      allow create: if isAuthenticated();
+
+      // Audit logs are immutable
+      allow update, delete: if false;
+    }
+  }
+}
