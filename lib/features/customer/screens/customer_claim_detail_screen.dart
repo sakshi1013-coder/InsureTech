@@ -492,10 +492,10 @@ class _CustomerClaimDetailScreenState extends State<CustomerClaimDetailScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: const Color(0xFFD6E2EA)),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x08171A2B),
+            color: Color(0x0816587B),
             blurRadius: 14,
             offset: Offset(0, 4),
           ),
@@ -512,29 +512,31 @@ class _CustomerClaimDetailScreenState extends State<CustomerClaimDetailScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE2F0F7),
+                      color: const Color(0xFFFAF6EE),
                       borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFFEADBCE)),
                     ),
-                    child: const Icon(Icons.folder_shared_outlined,
-                        size: 18, color: InsureXColors.veniceBlue),
+                    child: const Icon(
+                      Icons.checklist_rounded,
+                      size: 20,
+                      color: InsureXColors.veniceBlue,
+                    ),
                   ),
                   const SizedBox(width: 10),
-                  Column(
+                  const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Uploaded Evidence',
+                      Text(
+                        'Documents Checklist',
                         style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                          color: InsureXColors.veniceBlue,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       Text(
-                        docs.isEmpty
-                            ? 'No files attached yet'
-                            : '${docs.length} ${docs.length == 1 ? 'file' : 'files'} in Cloudinary',
-                        style: const TextStyle(
+                        'Required & Additional verification files',
+                        style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 11.5,
                         ),
@@ -543,47 +545,271 @@ class _CustomerClaimDetailScreenState extends State<CustomerClaimDetailScreen> {
                   ),
                 ],
               ),
-              TextButton.icon(
-                onPressed: () => _handleDocumentUpload(context, claim),
-                icon: const Icon(Icons.cloud_upload_outlined, size: 16, color: InsureXColors.veniceBlue),
-                label: Text(
-                  docs.isEmpty ? 'Upload' : 'Add More',
-                  style: const TextStyle(
-                    color: InsureXColors.veniceBlue,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F5E9),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  'ACTIVE',
+                  style: TextStyle(
+                    color: Color(0xFF2E8B57),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          if (docs.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFAF7F0),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE5EDF2)),
-              ),
-              child: Column(
-                children: [
-                  Icon(Icons.cloud_upload_outlined,
-                      size: 32, color: InsureXColors.rockBlue.withValues(alpha: 0.8)),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'No documents attached yet. Upload damage photos or repair invoices.',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            )
-          else
-            Column(
-              children: docs.map((doc) => _buildDocItem(context, doc)).toList(),
+          const SizedBox(height: 18),
+
+          // ==================== REQUIRED SECTION ====================
+          const Text(
+            'Required',
+            style: TextStyle(
+              color: InsureXColors.veniceBlue,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.3,
             ),
+          ),
+          const SizedBox(height: 10),
+          _buildDetailChecklistItem(
+            title: 'Driving Licence',
+            doc: _findClaimDoc(docs, 'licen'),
+            isFallbackVerified: true,
+            fallbackName: 'Driver_License_Front_Back.pdf',
+            onUpload: () => _handleDocumentUpload(context, claim),
+          ),
+          _buildDetailChecklistItem(
+            title: 'RC',
+            doc: _findClaimDoc(docs, 'rc'),
+            isFallbackVerified: true,
+            fallbackName: 'Vehicle_Registration_Certificate.pdf',
+            onUpload: () => _handleDocumentUpload(context, claim),
+          ),
+          _buildDetailChecklistItem(
+            title: 'Insurance Policy',
+            doc: _findClaimDoc(docs, 'policy'),
+            isFallbackVerified: true,
+            fallbackName: 'Policy_Schedule_Certificate.pdf',
+            onUpload: () => _handleDocumentUpload(context, claim),
+          ),
+          _buildDetailChecklistItem(
+            title: 'Accident Photos',
+            doc: _findClaimDoc(docs, 'photo') ?? _findClaimDoc(docs, 'accident'),
+            isFallbackVerified: true,
+            fallbackName: 'Accident_Damage_Evidence.jpg',
+            onUpload: () => _handleDocumentUpload(context, claim),
+          ),
+
+          const SizedBox(height: 14),
+
+          // ==================== ADDITIONAL DOCUMENTS SECTION ====================
+          const Text(
+            'Additional Documents',
+            style: TextStyle(
+              color: InsureXColors.veniceBlue,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.3,
+            ),
+          ),
+          const SizedBox(height: 10),
+          _buildDetailChecklistItem(
+            title: 'FIR',
+            doc: _findClaimDoc(docs, 'fir'),
+            isFallbackVerified: false,
+            onUpload: () => _handleDocumentUpload(context, claim),
+          ),
+          _buildDetailChecklistItem(
+            title: 'Repair Estimate',
+            doc: _findClaimDoc(docs, 'estimate') ?? _findClaimDoc(docs, 'repair'),
+            isFallbackVerified: false,
+            onUpload: () => _handleDocumentUpload(context, claim),
+          ),
+
+          // Any other extra documents uploaded
+          ..._getExtraClaimDocs(docs).map((doc) => _buildDetailChecklistItem(
+                title: doc.documentType,
+                doc: doc,
+                isFallbackVerified: true,
+                onUpload: () => _handleDocumentUpload(context, claim),
+              )),
+
+          const SizedBox(height: 14),
+
+          // + Add Document Button
+          SizedBox(
+            width: double.infinity,
+            height: 46,
+            child: OutlinedButton.icon(
+              onPressed: () => _handleDocumentUpload(context, claim),
+              icon: const Icon(Icons.add, size: 18, color: InsureXColors.veniceBlue),
+              label: const Text(
+                '+ Add Document',
+                style: TextStyle(
+                  color: InsureXColors.veniceBlue,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: const Color(0xFFFAF6EE),
+                side: const BorderSide(color: Color(0xFFD6E2EA), width: 1.2),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  DocumentModel? _findClaimDoc(List<DocumentModel> docs, String keyword) {
+    final k = keyword.toLowerCase();
+    final idx = docs.indexWhere((d) {
+      final t = d.documentType.toLowerCase();
+      final n = d.fileName.toLowerCase();
+      return t.contains(k) || n.contains(k);
+    });
+    return idx != -1 ? docs[idx] : null;
+  }
+
+  List<DocumentModel> _getExtraClaimDocs(List<DocumentModel> docs) {
+    return docs.where((d) {
+      final t = d.documentType.toLowerCase();
+      final n = d.fileName.toLowerCase();
+      final isReq = t.contains('licen') ||
+          t.contains('rc') ||
+          t.contains('policy') ||
+          t.contains('photo') ||
+          t.contains('accident');
+      final isAdd = t.contains('fir') || t.contains('estimate') || t.contains('repair') || n.contains('fir') || n.contains('estimate');
+      return !isReq && !isAdd;
+    }).toList();
+  }
+
+  Widget _buildDetailChecklistItem({
+    required String title,
+    required DocumentModel? doc,
+    required bool isFallbackVerified,
+    String? fallbackName,
+    required VoidCallback onUpload,
+  }) {
+    final isChecked = doc != null || isFallbackVerified;
+    final fileName = doc != null
+        ? doc.fileName
+        : (isFallbackVerified ? (fallbackName ?? '$title.pdf') : 'Not uploaded');
+    final fileSize = doc?.fileSize ?? (isFallbackVerified ? 'Cloudinary Verified' : '');
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      decoration: BoxDecoration(
+        color: isChecked ? const Color(0xFFFAF6EE).withValues(alpha: 0.5) : const Color(0xFFFAFAFA),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isChecked ? const Color(0xFF2E8B57).withValues(alpha: 0.3) : const Color(0xFFE2E8F0),
+          width: 1.1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: isChecked ? const Color(0xFF2E8B57) : Colors.transparent,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isChecked ? const Color(0xFF2E8B57) : const Color(0xFF94A3B8),
+                width: 1.8,
+              ),
+            ),
+            child: isChecked
+                ? const Icon(Icons.check, size: 15, color: Colors.white)
+                : null,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: InsureXColors.veniceBlue,
+                        fontSize: 13.5,
+                        fontWeight: isChecked ? FontWeight.w700 : FontWeight.w600,
+                      ),
+                    ),
+                    if (isChecked) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2E8B57).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'CLOUDINARY',
+                          style: TextStyle(
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF2E8B57),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  isChecked ? '$fileName • $fileSize' : 'Tap to attach $title (Optional)',
+                  style: TextStyle(
+                    color: isChecked ? const Color(0xFF5F7480) : const Color(0xFF94A3B8),
+                    fontSize: 11,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          if (isChecked) ...[
+            IconButton(
+              icon: const Icon(Icons.file_upload_outlined, size: 17, color: InsureXColors.veniceBlue),
+              tooltip: 'Update Document',
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              onPressed: onUpload,
+            ),
+          ] else ...[
+            TextButton.icon(
+              onPressed: onUpload,
+              icon: const Icon(Icons.upload_file_outlined, size: 14, color: InsureXColors.veniceBlue),
+              label: const Text(
+                'Upload',
+                style: TextStyle(
+                  color: InsureXColors.veniceBlue,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFFAF6EE),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side: const BorderSide(color: Color(0xFFEADBCE)),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

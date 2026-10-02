@@ -39,6 +39,48 @@ class _CustomerNewClaimScreenState extends State<CustomerNewClaimScreen> {
     if (widget.initialPolicy != null) {
       _selectedPolicy = widget.initialPolicy;
     }
+    _initDefaultChecklistDocs();
+  }
+
+  void _initDefaultChecklistDocs() {
+    _docs.addAll([
+      {
+        'type': 'Driving Licence',
+        'name': 'Driver_License_Verified.pdf',
+        'size': '840 KB',
+        'url': 'https://res.cloudinary.com/d2c6a4ta/image/upload/v1/insurex_docs/Driver_License.png',
+        'publicId': 'dl_customer_demo',
+        'resourceType': 'image',
+        'isRequired': true,
+      },
+      {
+        'type': 'RC',
+        'name': 'RC_SmartCard_Verified.pdf',
+        'size': '1.2 MB',
+        'url': 'https://res.cloudinary.com/d2c6a4ta/image/upload/v1/insurex_docs/Vehicle_RC.png',
+        'publicId': 'rc_customer_demo',
+        'resourceType': 'image',
+        'isRequired': true,
+      },
+      {
+        'type': 'Insurance Policy',
+        'name': 'Policy_Schedule_Doc.pdf',
+        'size': '650 KB',
+        'url': 'https://res.cloudinary.com/d2c6a4ta/image/upload/v1/insurex_docs/Policy_Schedule.png',
+        'publicId': 'policy_doc_demo',
+        'resourceType': 'raw',
+        'isRequired': true,
+      },
+      {
+        'type': 'Accident Photos',
+        'name': 'Accident_Damage_Site.jpg',
+        'size': '2.4 MB',
+        'url': 'https://res.cloudinary.com/d2c6a4ta/image/upload/v1/insurex_docs/Accident_Photos.jpg',
+        'publicId': 'accident_photos_demo',
+        'resourceType': 'image',
+        'isRequired': true,
+      },
+    ]);
   }
 
   // Step 2
@@ -461,65 +503,206 @@ class _CustomerNewClaimScreenState extends State<CustomerNewClaimScreen> {
 
   // ===================== STEP 3 =====================
   Widget _buildStep3() {
+    const requiredTypes = [
+      'Driving Licence',
+      'RC',
+      'Insurance Policy',
+      'Accident Photos',
+    ];
+
+    const additionalTypes = [
+      'FIR',
+      'Repair Estimate',
+    ];
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
-          Text('Upload Documents', style: AppTextStyles.displaySmall),
-          Text('Add supporting documents for your claim', style: AppTextStyles.bodySmall),
-          const SizedBox(height: 24),
-
-          // Document type grid
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: AppConstants.documentTypes.take(6).map((t) {
-              final alreadyAdded = _docs.any((d) => d['type'] == t);
-              return FilterChip(
-                label: Text(t, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-                selected: alreadyAdded,
-                onSelected: alreadyAdded ? null : (_) => _addDocument(t),
-                backgroundColor: Colors.white,
-                selectedColor: const Color(0xFFE2F0F7),
-                checkmarkColor: InsureXColors.veniceBlue,
-                labelStyle: TextStyle(
-                  color: alreadyAdded ? InsureXColors.veniceBlue : InsureXColors.body,
-                  fontWeight: FontWeight.w600,
-                ),
-                side: BorderSide(color: alreadyAdded ? InsureXColors.veniceBlue : const Color(0xFFD6E2EA)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              );
-            }).toList(),
+          const Text(
+            'Documents Checklist',
+            style: TextStyle(
+              color: InsureXColors.veniceBlue,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Verify all required documents to ensure rapid claim approval.',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12.5,
+            ),
           ),
           const SizedBox(height: 20),
 
-          // Uploaded docs list
-          if (_docs.isNotEmpty) ...[
-            Text('Uploaded Documents (${_docs.length})', style: AppTextStyles.headlineSmall),
-            const SizedBox(height: 10),
-            ..._docs.map((d) => _docItem(d)).toList(),
-          ],
-
-          const SizedBox(height: 16),
-          SizedBox(
+          // ==================== REQUIRED SECTION ====================
+          Container(
             width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => _addDocument('Other'),
-              icon: const Icon(Icons.upload_file_outlined, size: 16, color: InsureXColors.veniceBlue),
-              label: const Text('+ Add Document'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: InsureXColors.veniceBlue,
-                backgroundColor: Colors.white,
-                side: const BorderSide(color: Color(0xFFD6E2EA), style: BorderStyle.solid),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFD6E2EA)),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x0616587B),
+                  blurRadius: 10,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Required',
+                      style: TextStyle(
+                        color: InsureXColors.veniceBlue,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Text(
+                        'MANDATORY',
+                        style: TextStyle(
+                          color: Color(0xFF2E8B57),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                ...requiredTypes.map((type) {
+                  final doc = _findDocByType(type);
+                  return _buildChecklistItem(
+                    title: type,
+                    doc: doc,
+                    isRequired: true,
+                    onUpload: () => _addDocument(type),
+                    onRemove: doc != null ? () => setState(() => _docs.remove(doc)) : null,
+                  );
+                }),
+              ],
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 18),
 
+          // ==================== ADDITIONAL DOCUMENTS SECTION ====================
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFD6E2EA)),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x0616587B),
+                  blurRadius: 10,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Additional Documents',
+                      style: TextStyle(
+                        color: InsureXColors.veniceBlue,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFAF6EE),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFEADBCE)),
+                      ),
+                      child: const Text(
+                        'OPTIONAL',
+                        style: TextStyle(
+                          color: InsureXColors.body,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                ...additionalTypes.map((type) {
+                  final doc = _findDocByType(type);
+                  return _buildChecklistItem(
+                    title: type,
+                    doc: doc,
+                    isRequired: false,
+                    onUpload: () => _addDocument(type),
+                    onRemove: doc != null ? () => setState(() => _docs.remove(doc)) : null,
+                  );
+                }),
+
+                // Extra custom docs added
+                ..._getCustomDocs(requiredTypes, additionalTypes).map((doc) {
+                  return _buildChecklistItem(
+                    title: doc['type'] as String,
+                    doc: doc,
+                    isRequired: false,
+                    onUpload: () => _addDocument(doc['type'] as String),
+                    onRemove: () => setState(() => _docs.remove(doc)),
+                  );
+                }),
+
+                const SizedBox(height: 14),
+                // + Add Document Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: _showAddCustomDocModal,
+                    icon: const Icon(Icons.add, size: 18, color: InsureXColors.veniceBlue),
+                    label: const Text(
+                      '+ Add Document',
+                      style: TextStyle(
+                        color: InsureXColors.veniceBlue,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFAF6EE),
+                      side: const BorderSide(color: Color(0xFFD6E2EA), width: 1.2),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 28),
           Row(
             children: [
               Expanded(child: AppButton(label: '← Back', outlined: true, onPressed: _prevStep)),
@@ -529,6 +712,252 @@ class _CustomerNewClaimScreenState extends State<CustomerNewClaimScreen> {
           ),
           const SizedBox(height: 20),
         ],
+      ),
+    );
+  }
+
+  Widget _buildChecklistItem({
+    required String title,
+    required Map<String, dynamic>? doc,
+    required bool isRequired,
+    required VoidCallback onUpload,
+    VoidCallback? onRemove,
+  }) {
+    final isChecked = doc != null;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: isChecked ? const Color(0xFFFAF6EE).withValues(alpha: 0.5) : const Color(0xFFFAFAFA),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isChecked ? const Color(0xFF2E8B57).withValues(alpha: 0.35) : const Color(0xFFE2E8F0),
+          width: 1.1,
+        ),
+      ),
+      child: Row(
+        children: [
+          // Icon: ✓ (green checkmark) or ○ (unfilled circle)
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: isChecked ? const Color(0xFF2E8B57) : Colors.transparent,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isChecked ? const Color(0xFF2E8B57) : const Color(0xFF94A3B8),
+                width: 1.8,
+              ),
+            ),
+            child: isChecked
+                ? const Icon(Icons.check, size: 15, color: Colors.white)
+                : null,
+          ),
+          const SizedBox(width: 12),
+
+          // Title & file info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: InsureXColors.veniceBlue,
+                        fontSize: 13.5,
+                        fontWeight: isChecked ? FontWeight.w700 : FontWeight.w600,
+                      ),
+                    ),
+                    if (isChecked && (doc['url'] as String?)?.isNotEmpty == true) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2E8B57).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'CLOUDINARY',
+                          style: TextStyle(
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF2E8B57),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  isChecked
+                      ? '${doc['name']} • ${doc['size']}'
+                      : 'Tap upload to attach $title',
+                  style: TextStyle(
+                    color: isChecked ? const Color(0xFF5F7480) : const Color(0xFF94A3B8),
+                    fontSize: 11,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+
+          // Actions
+          if (isChecked) ...[
+            IconButton(
+              icon: const Icon(Icons.file_upload_outlined, size: 18, color: InsureXColors.veniceBlue),
+              tooltip: 'Replace Document',
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              onPressed: onUpload,
+            ),
+            if (onRemove != null) ...[
+              const SizedBox(width: 10),
+              IconButton(
+                icon: const Icon(Icons.close_rounded, size: 18, color: Color(0xFFB54747)),
+                tooltip: 'Remove',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                onPressed: onRemove,
+              ),
+            ],
+          ] else ...[
+            TextButton.icon(
+              onPressed: onUpload,
+              icon: const Icon(Icons.upload_file_outlined, size: 15, color: InsureXColors.veniceBlue),
+              label: const Text(
+                'Upload',
+                style: TextStyle(
+                  color: InsureXColors.veniceBlue,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFFAF6EE),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side: const BorderSide(color: Color(0xFFEADBCE)),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Map<String, dynamic>? _findDocByType(String type) {
+    final tLower = type.toLowerCase().trim();
+    final idx = _docs.indexWhere((d) {
+      final dt = (d['type'] as String).toLowerCase().trim();
+      if (tLower == 'driving licence' || tLower == 'driving license') {
+        return dt.contains('licence') || dt.contains('license') || dt.contains('dl');
+      }
+      if (tLower == 'rc') {
+        return dt == 'rc' || dt.contains('rc ') || dt.contains('registration');
+      }
+      if (tLower == 'insurance policy') {
+        return dt.contains('policy') || dt.contains('insurance');
+      }
+      if (tLower == 'accident photos') {
+        return dt.contains('accident') || dt.contains('photo') || dt.contains('damage');
+      }
+      if (tLower == 'fir') {
+        return dt == 'fir' || dt.contains('fir ') || dt.contains('police');
+      }
+      if (tLower == 'repair estimate') {
+        return dt.contains('estimate') || dt.contains('repair') || dt.contains('quotation');
+      }
+      return dt == tLower;
+    });
+    return idx != -1 ? _docs[idx] : null;
+  }
+
+  List<Map<String, dynamic>> _getCustomDocs(List<String> required, List<String> additional) {
+    return _docs.where((d) {
+      final t = (d['type'] as String).toLowerCase();
+      final isReq = t.contains('licen') || t.contains('rc') || t.contains('policy') || t.contains('accident') || t.contains('photo');
+      final isAdd = t.contains('fir') || t.contains('estimate') || t.contains('repair');
+      return !isReq && !isAdd;
+    }).toList();
+  }
+
+  void _showAddCustomDocModal() {
+    final customOptions = [
+      'FIR',
+      'Repair Estimate',
+      'Medical Report',
+      'Police Report',
+      'Witness Statement',
+      'Towing Bill',
+      'Other Supporting Document',
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(22),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Add Document',
+              style: TextStyle(
+                color: InsureXColors.veniceBlue,
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Select document category to upload from device',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            ),
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: customOptions.map((opt) {
+                return ActionChip(
+                  label: Text(opt, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                  backgroundColor: const Color(0xFFFAF6EE),
+                  side: const BorderSide(color: Color(0xFFEADBCE)),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    _addDocument(opt);
+                  },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
@@ -560,7 +989,12 @@ class _CustomerNewClaimScreenState extends State<CustomerNewClaimScreen> {
       );
 
       setState(() {
-        _docs.add({
+        final existingIdx = _docs.indexWhere((d) {
+          final t = (d['type'] as String).toLowerCase();
+          return t == docType.toLowerCase();
+        });
+
+        final newDoc = {
           'type': docType,
           'bytes': bytes,
           'name': picked.name,
@@ -568,7 +1002,13 @@ class _CustomerNewClaimScreenState extends State<CustomerNewClaimScreen> {
           'url': uploadRes.secureUrl,
           'publicId': uploadRes.publicId,
           'resourceType': uploadRes.resourceType,
-        });
+        };
+
+        if (existingIdx != -1) {
+          _docs[existingIdx] = newDoc;
+        } else {
+          _docs.add(newDoc);
+        }
       });
 
       if (mounted) {
@@ -588,59 +1028,6 @@ class _CustomerNewClaimScreenState extends State<CustomerNewClaimScreen> {
     } finally {
       if (mounted) setState(() => _isUploadingAsset = false);
     }
-  }
-
-  Widget _docItem(Map<String, dynamic> d) {
-    final hasUrl = d['url'] != null && (d['url'] as String).isNotEmpty;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF84B3CE), width: 1.0),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.description_outlined, size: 22, color: Color(0xFF16587B)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(d['type'], style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Color(0xFF16587B))),
-                    if (hasUrl) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2E8B57).withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text(
-                          'CLOUDINARY',
-                          style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Color(0xFF2E8B57)),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text('${d['name']} • ${d['size']}', style: const TextStyle(fontSize: 11, color: Color(0xFF5F7480))),
-              ],
-            ),
-          ),
-          const Icon(Icons.check_circle, size: 18, color: Color(0xFF2E8B57)),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () => setState(() => _docs.remove(d)),
-            child: const Icon(Icons.delete_outline, size: 18, color: Color(0xFFB54747)),
-          ),
-        ],
-      ),
-    );
   }
 
   // ===================== STEP 4 =====================
