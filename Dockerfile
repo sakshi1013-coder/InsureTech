@@ -2,9 +2,15 @@
 FROM ghcr.io/cirruslabs/flutter:stable AS build
 
 WORKDIR /app
+
+# Disable analytics
+RUN flutter config --no-analytics
+
+# Copy pubspec files first to leverage Docker layer caching
 COPY pubspec.yaml pubspec.lock ./
 RUN flutter pub get
 
+# Copy application source code and build Flutter web release
 COPY . .
 RUN flutter build web --release --no-tree-shake-icons
 
